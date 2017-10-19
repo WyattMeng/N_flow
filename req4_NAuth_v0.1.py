@@ -10,7 +10,7 @@ Created on Fri Oct 13 17:34:46 2017
 import pandas as pd
 import numpy as np
 import datetime
-
+import os
 from Tkinter import *
 import Tkinter as tk
 root = tk.Tk()
@@ -23,17 +23,38 @@ def scrollwheel(event):
     text.yview_scroll(-1*(event.delta/120), "units")
 text.bind_all('<MouseWheel>',scrollwheel)
 
-wp = r'.\N_workflow\重庆市沙坪坝融兴村镇银行有限责任公司-N-20151231-WP.xlsx'.decode('utf8')
-wp2 = r'.\N_workflow\重庆市沙坪坝融兴村镇银行有限责任公司-N-20161231-WP.xlsx'.decode('utf8')
+import tkFileDialog
+
+import tkMessageBox
+tkMessageBox.showinfo( "Hint:", 'Please select\n2015 N WP.xlsx first,\n2016 N WP.xlsx  then.')
+
+
+default_dir = r"%USERPROFILE%\Desktop"  # 设置默认打开目录
+wp = tkFileDialog.askopenfilename(title=u"选择文件",
+                                   initialdir=(os.path.expanduser(default_dir)))
+wp2 = tkFileDialog.askopenfilename(title=u"选择文件",
+                                  initialdir=(os.path.expanduser(default_dir)))
+
+def tkMessage(textWidget, textContent):
+    textWidget.insert(INSERT, textContent)
+    textWidget.update()
+    textWidget.see('end')  
+
+
 
 from openpyxl import load_workbook
 wb = load_workbook(wp2, data_only = True)
+
+tkMessage(text, '| -- '+wp2.split('/')[-1]+'\n')
+text.pack()
 
 N_sheets = ['N100', 'N200', 'N300', 'N400']
 
 
 for n_sheet in N_sheets:
 
+    tkMessage(text, '    | -- '+n_sheet+'\n')
+    
     df = pd.read_excel(wp, sheetname= n_sheet, headers = None)
     
     #def dateToStr(date):
@@ -213,7 +234,13 @@ for n_sheet in N_sheets:
         #print dict2[k2]
         for k in dict:
             if dict[k]['suj'] == dict2[k2]:
+                
+                tkMessage(text, '        | -- Subject : '+ dict[k]['suj'] +'\n')
+                
                 print k2, data_y , dict[k]['val']
                 ws[k2][data_y].value = dict[k]['val']
     
-wb.save(wp2)            
+wb.save(wp2)   
+
+tkMessage(text, '\n ========Write Successfully!=========\n') 
+root.mainloop()           
